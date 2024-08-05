@@ -23,7 +23,7 @@ pipeline {
 
         stage('Terraform Init') {
             steps {
-                dir('/c/Users/madok/Downloads/git/ansible_CICD') {
+                dir('git') {
                     sh 'terraform init'
                 }
             }
@@ -31,7 +31,7 @@ pipeline {
 
         stage('Terraform Plan') {
             steps {
-                dir('/c/Users/madok/Downloads/git/ansible_CICD') {
+                dir('git') {
                     sh 'terraform plan'
                 }
             }
@@ -39,7 +39,7 @@ pipeline {
 
         stage('Terraform Apply') {
             steps {
-                dir('/c/Users/madok/Downloads/git/ansible_CICD') {
+                dir('git') {
                     sh 'terraform apply -auto-approve'
                 }
             }
