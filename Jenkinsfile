@@ -26,7 +26,7 @@ pipeline {
                 script {
                     // Run terraform plan with nohup and tail to ensure continuous output
                     sh '''
-                        nohup terraform plan > plan.log 2>&1 &
+                        nohup terraform plan -out=tfplan > plan.log 2>&1 &
                         tail -f plan.log
                     '''
                 }
