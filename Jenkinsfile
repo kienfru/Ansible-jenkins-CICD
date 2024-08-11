@@ -1,55 +1,52 @@
 pipeline {
     agent any
 
-    environment {
-        TERRAFORM_VERSION = '1.0.11'
-    }
-
     stages {
-        stage('Install Terraform') {
+        stage('Checkout') {
             steps {
-                script {
-                    def terraformExists = sh(script: 'terraform --version', returnStatus: true) == 0
-                    if (!terraformExists) {
-                        sh """
-                        wget https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip
-                        unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip
-                        sudo mv terraform /usr/local/bin/
-                        """
-                    }
-                }
+                // Checkout the code from the Git repository
+                git branch: 'main', url: 'https://github.com/kienfru/Ansible-jenkins-CICD.git'
             }
         }
-
+        /*stage('Checkov Scan') {
+            steps {
+                // Verify Checkov installation
+                sh '/home/ubuntu/.local/share/pipx/venvs/checkov --version'
+                // Run Checkov and output results in JUnit XML format
+                sh '/home/ubuntu/.local/share/pipx/venvs/checkov -d . -o junitxml --output-file-path checkov_results.xml"'
+                // Publish the Checkov results
+                junit 'checkov_results.xml'
+            }
+        }*/
         stage('Terraform Init') {
             steps {
-                dir('git') {
-                    sh 'terraform init'
-                }
+                // Initialize Terraform
+                sh 'terraform init'
             }
         }
-
         stage('Terraform Plan') {
             steps {
-                dir('git') {
-                    sh 'terraform plan'
-                }
+                // Generate and show Terraform execution plan
+                sh 'terraform plan'
             }
         }
-
         stage('Terraform Apply') {
             steps {
-                dir('git') {
-                    sh 'terraform apply -auto-approve'
-                }
+                // Apply the Terraform plan to create/update infrastructure
+                sh 'terraform apply -auto-approve'
             }
         }
-    }
-
-    post {
-        always {
-            echo 'Cleaning up...'
-            cleanWs()
+        stage('Sleep 5mins') {
+            steps {
+                // Pause the pipeline for 10 minutes
+                sleep time: 5, unit: 'MINUTES'
+            }
+        }
+        stage('Terraform Destroy') {
+            steps {
+                // Destroy the Terraform-managed infrastructure
+                sh 'terraform destroy -auto-approve'
+            }
         }
     }
 }
