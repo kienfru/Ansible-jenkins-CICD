@@ -1,52 +1,61 @@
 pipeline {
     agent any
 
+    environment {
+        // Increase the HEARTBEAT_CHECK_INTERVAL for durable-task plugin
+        JAVA_OPTS = "-Dorg.jenkinsci.plugins.durabletask.BourneShellScript.HEARTBEAT_CHECK_INTERVAL=86400"
+    }
+
     stages {
-        stage('Checkout') {
+        stage('Checkout SCM') {
             steps {
-                // Checkout the code from the Git repository
-                git branch: 'main', url: 'https://github.com/kienfru/Ansible-jenkins-CICD.git'
+                git url: 'https://github.com/kienfru/Ansible-jenkins-CICD.git', branch: 'main'
             }
         }
-        /*stage('Checkov Scan') {
-            steps {
-                // Verify Checkov installation
-                sh '/home/ubuntu/.local/share/pipx/venvs/checkov --version'
-                // Run Checkov and output results in JUnit XML format
-                sh '/home/ubuntu/.local/share/pipx/venvs/checkov -d . -o junitxml --output-file-path checkov_results.xml"'
-                // Publish the Checkov results
-                junit 'checkov_results.xml'
-            }
-        }*/
+
         stage('Terraform Init') {
             steps {
-                // Initialize Terraform
-                sh 'terraform init'
+                sh '''
+                    terraform init
+                '''
             }
         }
+
         stage('Terraform Plan') {
             steps {
-                // Generate and show Terraform execution plan
-                sh 'terraform plan'
+                script {
+                    // Run terraform plan with nohup and tail to ensure continuous output
+                    sh '''
+                        nohup terraform plan > plan.log 2>&1 &
+                        tail -f plan.log
+                    '''
+                }
             }
         }
+
         stage('Terraform Apply') {
             steps {
-                // Apply the Terraform plan to create/update infrastructure
+                input message: 'Do you want to apply the changes?', ok: 'Apply'
                 sh 'terraform apply -auto-approve'
             }
         }
-        stage('Sleep 5mins') {
-            steps {
-                // Pause the pipeline for 10 minutes
-                sleep time: 5, unit: 'MINUTES'
-            }
-        }
+
         stage('Terraform Destroy') {
             steps {
-                // Destroy the Terraform-managed infrastructure
+                input message: 'Do you want to destroy the infrastructure?', ok: 'Destroy'
                 sh 'terraform destroy -auto-approve'
             }
+        }
+    }
+
+    post {
+        always {
+            // Archive the Terraform plan log for troubleshooting
+            archiveArtifacts artifacts: 'plan.log', allowEmptyArchive: true
+        }
+        cleanup {
+            // Clean up the workspace
+            cleanWs()
         }
     }
 }
