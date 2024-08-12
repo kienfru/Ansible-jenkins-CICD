@@ -5,7 +5,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 // Checkout the code from the Git repository
-                git branch: 'main', url: 'https://github.com/dazealot88/vpc-jenkins.git'
+                git branch: 'main', url: 'https://github.com/kienfru/Ansible-jenkins-CICD.git'
             }
         }
         /*stage('Checkov Scan') {
