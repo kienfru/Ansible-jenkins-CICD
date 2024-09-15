@@ -26,7 +26,7 @@ pipeline {
                 sh 'terraform apply -auto-approve'
             }
         }
-       /* stage('Sleep 5mins') {
+        stage('Sleep 5mins') {
             steps {
                 // Pause the pipeline for 10 minutes
                 sleep time: 5, unit: 'MINUTES'
@@ -37,6 +37,6 @@ pipeline {
                 // Destroy the Terraform-managed infrastructure
                 sh 'terraform destroy -auto-approve'
             }
-        }*/
+        }
     }
 }
