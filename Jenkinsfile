@@ -20,10 +20,10 @@ pipeline {
                 sh 'terraform plan'
             }
         }
-        stage('Terraform Destroy') {
+        stage('Terraform destroy') {
             steps {
                 // Apply the Terraform plan to create/update infrastructure
-                sh 'terraform Destroy -auto-approve'
+                sh 'terraform destroy -auto-approve'
             }
         }
         /*
