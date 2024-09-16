@@ -20,13 +20,12 @@ pipeline {
                 sh 'terraform plan'
             }
         }
-        stage('Terraform destroy') {
+        stage('Terraform apply') {
             steps {
                 // Apply the Terraform plan to create/update infrastructure
-                sh 'terraform destroy -auto-approve'
+                sh 'terraform apply -auto-approve'
             }
         }
-        /*
         stage('Sleep 5mins') {
             steps {
                 // Pause the pipeline for 10 minutes
@@ -39,6 +38,5 @@ pipeline {
                 sh 'terraform destroy -auto-approve'
             }
         }
-        */
     }
 }
